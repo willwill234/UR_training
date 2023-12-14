@@ -1,0 +1,5 @@
+universal_robot/ur_description
+/home/will/work/robot_server_side/devel/.private/ur_description/cmake.lock /home/will/work/robot_server_side/devel/./cmake.lock
+/home/will/work/robot_server_side/devel/.private/ur_description/lib/pkgconfig/ur_description.pc /home/will/work/robot_server_side/devel/lib/pkgconfig/ur_description.pc
+/home/will/work/robot_server_side/devel/.private/ur_description/share/ur_description/cmake/ur_descriptionConfig-version.cmake /home/will/work/robot_server_side/devel/share/ur_description/cmake/ur_descriptionConfig-version.cmake
+/home/will/work/robot_server_side/devel/.private/ur_description/share/ur_description/cmake/ur_descriptionConfig.cmake /home/will/work/robot_server_side/devel/share/ur_description/cmake/ur_descriptionConfig.cmake

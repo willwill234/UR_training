@@ -1,0 +1,8 @@
+prefix=/home/will/work/robot_server_side/devel/.private/simulation_objects
+
+Name: simulation_objects
+Description: Description of simulation_objects
+Version: 1.0.0
+Cflags: 
+Libs: -L${prefix}/lib 
+Requires: 

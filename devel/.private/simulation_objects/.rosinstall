@@ -1,0 +1,2 @@
+- setup-file:
+    local-name: /home/will/work/robot_server_side/devel/.private/simulation_objects/setup.sh

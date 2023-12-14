@@ -1,0 +1,5 @@
+mir_robot/mir_description
+/home/will/work/robot_server_side/devel/.private/mir_description/cmake.lock /home/will/work/robot_server_side/devel/./cmake.lock
+/home/will/work/robot_server_side/devel/.private/mir_description/lib/pkgconfig/mir_description.pc /home/will/work/robot_server_side/devel/lib/pkgconfig/mir_description.pc
+/home/will/work/robot_server_side/devel/.private/mir_description/share/mir_description/cmake/mir_descriptionConfig-version.cmake /home/will/work/robot_server_side/devel/share/mir_description/cmake/mir_descriptionConfig-version.cmake
+/home/will/work/robot_server_side/devel/.private/mir_description/share/mir_description/cmake/mir_descriptionConfig.cmake /home/will/work/robot_server_side/devel/share/mir_description/cmake/mir_descriptionConfig.cmake

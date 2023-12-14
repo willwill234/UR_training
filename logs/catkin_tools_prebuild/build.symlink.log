@@ -1,0 +1,12 @@
+Symlinking /home/will/work/robot_server_side/devel/./local_setup.bash
+Symlinking /home/will/work/robot_server_side/devel/./local_setup.sh
+Symlinking /home/will/work/robot_server_side/devel/./setup.zsh
+Symlinking /home/will/work/robot_server_side/devel/./env.sh
+Symlinking /home/will/work/robot_server_side/devel/./setup.sh
+Symlinking /home/will/work/robot_server_side/devel/./_setup_util.py
+Symlinking /home/will/work/robot_server_side/devel/./setup.bash
+Symlinking /home/will/work/robot_server_side/devel/./local_setup.zsh
+Symlinking /home/will/work/robot_server_side/devel/./cmake.lock
+Symlinking /home/will/work/robot_server_side/devel/lib/pkgconfig/catkin_tools_prebuild.pc
+Symlinking /home/will/work/robot_server_side/devel/share/catkin_tools_prebuild/cmake/catkin_tools_prebuildConfig.cmake
+Symlinking /home/will/work/robot_server_side/devel/share/catkin_tools_prebuild/cmake/catkin_tools_prebuildConfig-version.cmake

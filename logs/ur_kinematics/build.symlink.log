@@ -1,0 +1,10 @@
+Symlinking /home/will/work/robot_server_side/devel/lib/libur3_moveit_plugin.so
+Symlinking /home/will/work/robot_server_side/devel/lib/libur10_kin.so
+Symlinking /home/will/work/robot_server_side/devel/lib/libur3_kin.so
+Symlinking /home/will/work/robot_server_side/devel/lib/libur5_kin.so
+Symlinking /home/will/work/robot_server_side/devel/lib/libur10_moveit_plugin.so
+Symlinking /home/will/work/robot_server_side/devel/lib/libur5_moveit_plugin.so
+Symlinking /home/will/work/robot_server_side/devel/lib/pkgconfig/ur_kinematics.pc
+Symlinking /home/will/work/robot_server_side/devel/lib/python3/dist-packages/ur_kinematics/__init__.py
+Symlinking /home/will/work/robot_server_side/devel/share/ur_kinematics/cmake/ur_kinematicsConfig-version.cmake
+Symlinking /home/will/work/robot_server_side/devel/share/ur_kinematics/cmake/ur_kinematicsConfig.cmake

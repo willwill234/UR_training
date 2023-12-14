@@ -1,187 +1,65 @@
-FROM osrf/ros:humble-desktop-full
-############################## SYSTEM PARAMETERS ##############################
-# * Arguments
-ARG USER=initial
-ARG GROUP=initial
-ARG UID=1000
-ARG GID="${UID}"
-ARG SHELL=/bin/bash
-ARG HARDWARE=x86_64
-ARG ENTRYPOINT_FILE=entrypint.sh
+FROM osrf/ros:noetic-desktop-full
 
-# * Env vars for the nvidia-container-runtime.
-ENV NVIDIA_VISIBLE_DEVICES all
-ENV NVIDIA_DRIVER_CAPABILITIES all
-# ENV NVIDIA_DRIVER_CAPABILITIES graphics,utility,compute
+ARG GIT_COMMIT=unknown
+LABEL git-commit=$GIT_COMMIT
+ARG CI_JOB_TOKEN
 
-# * Setup users and groups
-RUN groupadd --gid "${GID}" "${GROUP}" \
-    && useradd --gid "${GID}" --uid "${UID}" -ms "${SHELL}" "${USER}" \
-    && mkdir -p /etc/sudoers.d \
-    && echo "${USER}:x:${UID}:${UID}:${USER},,,:/home/${USER}:${SHELL}" >> /etc/passwd \
-    && echo "${USER}:x:${UID}:" >> /etc/group \
-    && echo "${USER} ALL=(ALL) NOPASSWD: ALL" > "/etc/sudoers.d/${USER}" \
-    && chmod 0440 "/etc/sudoers.d/${USER}"
+ENV DEBIAN_FRONTEND noninteractive
+ENV ROS_DISTRO=noetic
+ENV ROBOGYM_WS=/robogym_ws
 
-# * Replace apt urls
-# ? Change to tku
-RUN sed -i 's@archive.ubuntu.com@ftp.tku.edu.tw@g' /etc/apt/sources.list
-# ? Change to Taiwan
-# RUN sed -i 's@archive.ubuntu.com@tw.archive.ubuntu.com@g' /etc/apt/sources.list
+RUN rm /bin/sh && ln -s /bin/bash /bin/sh
 
-# * Time zone
-ENV TZ=Asia/Taipei
-RUN ln -snf /usr/share/zoneinfo/"${TZ}" /etc/localtime && echo "${TZ}" > /etc/timezone
+RUN apt-get update && apt-get install -y curl && \
+    curl -s https://raw.githubusercontent.com/ros/rosdistro/master/ros.asc | sudo apt-key add - && \
+    apt-get update && apt-get install -y \
+    apt-utils build-essential psmisc vim-gtk \
+    git swig sudo libcppunit-dev \
+    python3-catkin-tools python3-rosdep python3-pip \
+    python3-rospkg python3-future python3-osrf-pycommon
 
-# * Copy custom configuration
-# ? Requires docker version >= 17.09
-COPY --chmod=0775 ./${ENTRYPOINT_FILE} /entrypoint.sh
-COPY --chown="${USER}":"${GROUP}" --chmod=0775 config config
-# ? docker version < 17.09
-# COPY ./${ENTRYPOINT_FILE} /entrypoint.sh
-# COPY config config
-# RUN sudo chmod 0775 /entrypoint.sh && \
-    # sudo chown -R "${USER}":"${GROUP}" config \
-    # && sudo chmod -R 0775 config
+RUN source /opt/ros/$ROS_DISTRO/setup.bash &&\
+    mkdir -p $ROBOGYM_WS/src &&\
+    cd $ROBOGYM_WS/src &&\
+    git clone -b $ROS_DISTRO https://github.com/jr-robotics/mir_robot.git &&\
+    git clone -b $ROS_DISTRO https://github.com/jr-robotics/universal_robot.git &&\ 
+    # PANDA START
+    # git clone -b v0.7.1-dev https://github.com/jr-robotics/franka_ros_interface &&\
+    # git clone https://github.com/jr-robotics/franka_panda_description &&\ 
+    # git clone -b ${ROS_DISTRO}-devel https://github.com/jr-robotics/panda_simulator &&\
+    # git clone https://github.com/orocos/orocos_kinematics_dynamics &&\
+    # cd orocos_kinematics_dynamics && git checkout b35c424e77ebc5b7e6f1c5e5c34f8a4666fbf5bc && cd .. &&\
+    # PANDA END
+    # git clone https://github.com/jr-robotics/Universal_Robots_ROS_Driver.git 
+    # git clone https://gitlab-ci-token:${CI_JOB_TOKEN}@robotics-git.joanneum.at/perception/scene_perception.git 
+    cd $ROBOGYM_WS &&\
+    apt-get update &&\
+    rosdep install --from-paths src -i -y --rosdistro $ROS_DISTRO --as-root=apt:false &&\
+    catkin init &&\
+    catkin build &&\
+    pip3 install robo-gym-server-modules scipy numpy
+    # Panda requirement
+    # pip install --upgrade numpy numpy-quaternion==2020.5.11.13.33.35
 
-############################### INSTALL #######################################
-# * Install packages
-RUN apt update \
-    && apt install -y --no-install-recommends \
-        sudo \
-        git \
-        htop \
-        wget \
-        curl \
-        psmisc \
-        # * Shell
-        tmux \
-        terminator \
-        # * base tools
-        udev \
-        python3-pip \
-        python3-dev \
-        python3-setuptools \
-        python3-colcon-common-extensions \
-        software-properties-common \
-        lsb-release \
-        ros-humble-rmw-cyclonedds-cpp \
-        # * Work tools
-    && apt clean \
-    && rm -rf /var/lib/apt/lists/*
+ARG CACHEBUST=1
 
-# gnome-terminal libcanberra-gtk-module libcanberra-gtk3-module \
-# dbus-x11 libglvnd0 libgl1 libglx0 libegl1 libxext6 libx11-6 \
-# display dep
-# libnss3 libgbm1 libxshmfence1 libdrm2 libx11-xcb1 libxcb-*-dev
-
-# ENV DEBIAN_FRONTEND=noninteractive
-# RUN sudo add-apt-repository universe
-# RUN sudo apt update
-# RUN sudo curl -sSL https://raw.githubusercontent.com/ros/rosdistro/master/ros.key  -o /usr/share/keyrings/ros-archive-keyring.gpg
-# # RUN echo "deb [arch=$(dpkg --print-architecture) signed-by=/usr/share/keyrings/ros-archive-keyring.gpg] http://packages.ros.org/ros2/ubuntu $(lsb_release -cs) main" | tee /etc/apt/sources.list.d/ros2.list > /dev/null
-# RUN echo "deb [arch=$(dpkg --print-architecture) signed-by=/usr/share/keyrings/ros-archive-keyring.gpg] http://packages.ros.org/ros2/ubuntu $(. /etc/os-release && echo $UBUNTU_CODENAME) main" | sudo tee /etc/apt/sources.list.d/ros2.list > /dev/null
-# RUN sudo apt update
-# # RUN sudo  apt install -y -o Dpkg::Options::="--force-confdef" -o Dpkg::Options::="--force-confold" keyboard-configuration
-# RUN sudo DEBIAN_FRONTEND=noninteractive apt install -y ros-galactic-desktop
-# #ROS2 Cyclone DDS
-# RUN sudo apt install -y ros-humble-rmw-cyclonedds-cpp
-# #colcon depend
-# RUN sudo apt install -y python3-colcon-common-extensions
+#ADD . $ROBOGYM_WS/src/robo-gym-robot-servers
+COPY ./robo-gym-robot-servers $ROBOGYM_WS/src/robo-gym-robot-servers 
+#這裡我有改他指定的路徑 原本ADD行不通
 
 
-# RUN sudo apt-key adv --keyserver keyserver.ubuntu.com --recv-key F6E65AC044F831AC80A06380C8B3A55A6F3EFCDE || sudo apt-key adv --keyserver hkp://keyserver.ubuntu.com:80 --recv-key F6E65AC044F831AC80A06380C8B3A55A6F3EFCDE
-# RUN sudo add-apt-repository "deb https://librealsense.intel.com/Debian/apt-repo $(lsb_release -cs) main" -u
-
-# RUN apt update && apt install -y --no-install-recommends \
-# #   #Realsense SDK depend
-# #   librealsense2-dkms \
-# #   librealsense2-utils \
-# #   librealsense2-dev \
-# #   librealsense2-dbg \
-#   ros-humble-librealsense2* \
-#   ros-humble-diagnostic-updater \
-#   && apt-get clean \
-#   && rm -rf /var/lib/apt/lists  
+# Build ROS Workspace
+RUN source /opt/ros/$ROS_DISTRO/setup.bash &&\
+    source $ROBOGYM_WS/devel/setup.bash &&\ 
+    cd $ROBOGYM_WS && \
+    apt-get update && \
+    # rosdep install --from-paths src -i -y --rosdistro $ROS_DISTRO --as-root=apt:false && \
+    rosdep install --from-paths src/robo-gym-robot-servers/ur_robot_server src/robo-gym-robot-servers/mir100_robot_server -i -y --rosdistro $ROS_DISTRO --as-root=apt:false &&\
+    catkin build
 
 
-RUN ./config/pip/pip_setup.sh
 
+COPY ./ros-entrypoint.sh /
+ENTRYPOINT ["/ros-entrypoint.sh"]
 
-RUN sudo apt-key adv --keyserver keyserver.ubuntu.com --recv-key F6E65AC044F831AC80A06380C8B3A55A6F3EFCDE || sudo apt-key adv --keyserver hkp://keyserver.ubuntu.com:80 --recv-key F6E65AC044F831AC80A06380C8B3A55A6F3EFCDE
-RUN sudo add-apt-repository "deb https://librealsense.intel.com/Debian/apt-repo $(lsb_release -cs) main" -u
-RUN apt update && apt install -y --no-install-recommends \
-#   #Realsense SDK depend
-    librealsense2-dkms \
-    librealsense2-utils \
-    librealsense2-dev \
-    librealsense2-dbg \
-    # ros-humble-librealsense2* \
-    ros-humble-diagnostic-updater \
-    ros-humble-moveit \
-    && apt-get clean \
-    && rm -rf /var/lib/apt/lists 
-
-
-#   #OMPL depend
-RUN apt update && apt install -y --no-install-recommends \
-    lsb-release \
-    g++ \
-    cmake \
-    pkg-config \
-    libboost-serialization-dev \
-    libboost-filesystem-dev \
-    libboost-system-dev \
-    libboost-program-options-dev \
-    libboost-test-dev \
-    libeigen3-dev \
-    libode-dev wget \
-    libyaml-cpp-dev \
-    && apt-get clean \
-    && rm -rf /var/lib/apt/lists 
-
-RUN sudo pip3 install -vU https://github.com/CastXML/pygccxml/archive/develop.zip pyplusplus
-
-RUN apt update && apt install -y --no-install-recommends \
-    castxml \
-    libboost-python-dev \
-    libboost-numpy-dev \
-    python3-numpy \
-    pypy3 \
-    python3-pyqt5.qtopengl \
-    freeglut3-dev \
-    libassimp-dev \
-    python3-opengl \
-    python3-flask \
-    python3-celery \
-    libccd-dev \
-    libfcl-dev \
-    && apt-get clean \
-    && rm -rf /var/lib/apt/lists 
-
-RUN sudo pip3 install -vU PyOpenGL-accelerate
-
-############################## USER CONFIG ####################################
-# * Switch user to ${USER}
-USER ${USER}
-
-RUN ./config/shell/bash_setup.sh "${USER}" "${GROUP}" \
-    && ./config/shell/terminator/terminator_setup.sh "${USER}" "${GROUP}" \
-    && ./config/shell/tmux/tmux_setup.sh "${USER}" "${GROUP}" \
-    && sudo rm -rf /config
-RUN export CXX=g++
-RUN export MAKEFLAGS="-j nproc"
-RUN echo "source /opt/ros/humble/setup.bash" >> ~/.bashrc
-RUN echo "export RMW_IMPLEMENTATION=rmw_cyclonedds_cpp" >> ~/.bashrc
-
-# * Switch workspace to ~/work
-RUN sudo mkdir -p /home/"${USER}"/work
-WORKDIR /home/"${USER}"/work
-
-# * Make SSH available
-EXPOSE 22
-
-ENTRYPOINT [ "/entrypoint.sh", "terminator" ]
-# ENTRYPOINT [ "/entrypoint.sh", "tmux" ]
-# ENTRYPOINT [ "/entrypoint.sh", "bash" ]
-# ENTRYPOINT [ "/entrypoint.sh" ]
+CMD ["bash"]

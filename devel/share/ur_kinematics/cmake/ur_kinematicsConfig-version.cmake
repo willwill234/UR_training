@@ -1,0 +1,1 @@
+/home/will/work/robot_server_side/devel/.private/ur_kinematics/share/ur_kinematics/cmake/ur_kinematicsConfig-version.cmake

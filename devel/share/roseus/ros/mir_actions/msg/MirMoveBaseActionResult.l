@@ -1,0 +1,1 @@
+/home/will/work/robot_server_side/devel/.private/mir_actions/share/roseus/ros/mir_actions/msg/MirMoveBaseActionResult.l

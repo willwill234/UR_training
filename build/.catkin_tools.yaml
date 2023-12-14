@@ -1,0 +1,6 @@
+devel_space: /home/will/work/robot_server_side/devel
+install: false
+install_space: /home/will/work/robot_server_side/install
+profile: default
+source_space: /home/will/work/robot_server_side/src
+workspace: /home/will/work/robot_server_side
